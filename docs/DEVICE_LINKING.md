@@ -5,6 +5,25 @@
 
 ---
 
+## 🎯 Device Linking Purpose
+
+**Device linking connects Home Assistant devices to Allow2 children for activity tracking and enforcement.**
+
+**Important Distinctions:**
+- **Device linking** = Connecting HA devices to Allow2 children (done in allow2automate app)
+- **Quota configuration** = Setting time limits and rules (done in **Allow2 mobile/web apps**)
+- **Parent-child communication** = Requests, approvals, messages (done in **Allow2 mobile/web apps**)
+
+**The device linking UI in allow2automate allows parents to:**
+- ✅ Link/unlink devices to children
+- ✅ View device status and activity
+- ✅ Configure shared device time rules (which child uses device when)
+- ❌ **NOT** set quotas (use Allow2 app)
+- ❌ **NOT** configure bans or pauses (use Allow2 app)
+- ❌ **NOT** communicate with children (use Allow2 app)
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -566,11 +585,14 @@ Step 5: Return result
 
 ### Device Linking Dashboard
 
+**This UI is in the allow2automate app - it shows device links, NOT quota configuration**
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ Device Linking                                    [+ Add]  │
 ├────────────────────────────────────────────────────────────┤
-│                                                             │
+│ ⚠️  Configure quotas in Allow2 mobile app, not here        │
+├────────────────────────────────────────────────────────────┤
 │ Bobby (Age 12)                                              │
 │ ┌──────────────────────────────────────────────────────┐   │
 │ │ ⚙️ Xbox Series X                                     │   │
@@ -579,7 +601,7 @@ Step 5: Return result
 │ │ Status: ● Online (35 min today)                      │   │
 │ │ Power: 🔌 switch.bobby_xbox_plug                    │   │
 │ │                                                       │   │
-│ │ [Edit] [Unlink] [View History]                       │   │
+│ │ [Edit Link] [Unlink] [View History]                  │   │
 │ ├──────────────────────────────────────────────────────┤   │
 │ │ 📺 Living Room TV (Shared)                           │   │
 │ │ Location: Living Room                                │   │

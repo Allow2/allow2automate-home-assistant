@@ -5,6 +5,24 @@
 
 ---
 
+## 🎯 Integration Purpose
+
+**This guide shows how to integrate Home Assistant devices with allow2automate for activity tracking and enforcement.**
+
+**Remember:**
+- These integrations enable **device monitoring and control**
+- Actual **quota configuration** happens in **Allow2 mobile/web apps**
+- **Parent-child communication** happens in **Allow2 mobile/web apps**
+- The plugin **enforces decisions** made in Allow2 platform
+
+**Setup Workflow:**
+1. Configure device integrations in Home Assistant (this guide)
+2. Link devices to children in allow2automate app
+3. Set quotas and rules in Allow2 mobile/web app
+4. Plugin enforces those rules automatically
+
+---
+
 ## Table of Contents
 
 1. [Xbox Integration](#xbox-integration)

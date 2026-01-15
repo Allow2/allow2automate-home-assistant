@@ -6,11 +6,36 @@
 
 ---
 
+## ⚠️ Critical Understanding: Allow2 Platform vs allow2automate
+
+**Before reading this documentation, understand the architecture:**
+
+### Allow2 Platform (iOS/Android/Web Apps)
+**This is the control center where parents:**
+- Set quotas (daily time limits for gaming, video, etc.)
+- Configure day types (school day, weekend, vacation)
+- Manage bans and pauses
+- Approve/deny child requests for extra time
+- Communicate with children
+- View usage across all devices
+
+### Allow2automate Application
+**This is the enforcement layer that:**
+- Links Home Assistant devices to Allow2 children
+- Monitors device activity
+- Reports usage to Allow2 platform
+- Enforces decisions made in Allow2 platform
+- Shows device status (NOT quota configuration)
+
+**Key Point:** Parents do NOT configure quotas in allow2automate. They configure them in Allow2 mobile/web apps, and allow2automate enforces those decisions.
+
+---
+
 ## Overview
 
 The **allow2automate-homeassistant** plugin bridges parental controls with smart home automation by integrating with Home Assistant to monitor, track, and control entertainment devices across your home.
 
-Transform your Home Assistant installation into a comprehensive parental control enforcement hub for gaming consoles, smart TVs, streaming devices, and more.
+Transform your Home Assistant installation into a comprehensive parental control **enforcement hub** for gaming consoles, smart TVs, streaming devices, and more.
 
 ---
 
@@ -208,29 +233,44 @@ Follow **[INTEGRATIONS.md](./INTEGRATIONS.md)** to:
 
 ---
 
-## Example Use Case
+## Example Use Case: Complete Workflow
 
 ### Bobby's Xbox Screen Time Tracking
 
-**Setup:**
-- Bobby (age 12) has Xbox Series X in bedroom
-- Daily quota: 2 hours gaming
-- Smart plug controls Xbox power
+**Parent Configuration (in Allow2 Mobile App):**
+1. Parent opens Allow2 app on iPhone/Android
+2. Selects Bobby's profile
+3. Sets gaming quota: 2 hours per weekday
+4. Configures day types (school day vs weekend)
+5. Sets up notifications preferences
 
-**Flow:**
+**Device Setup (in allow2automate App):**
+1. Parent opens allow2automate app
+2. Scans Home Assistant for devices
+3. Links "Xbox Series X" to Bobby
+4. Links smart plug to Xbox for power control
+
+**Home Assistant Setup:**
+1. Xbox Series X integrated in Home Assistant
+2. Smart plug connected to Xbox power
+3. Home Assistant reports device states
+
+**Daily Enforcement Flow:**
 1. Bobby turns on Xbox (3:30 PM)
-2. Plugin receives WebSocket event from Home Assistant
-3. Activity Tracker starts session for Bobby
-4. Usage logged to Allow2 API every 5 minutes
-5. At 5:25 PM (115 minutes), warning notification sent
-6. At 5:30 PM (120 minutes), smart plug turns off Xbox
-7. Bobby sees notification: "Daily Xbox time limit reached"
+2. Plugin detects activity via Home Assistant WebSocket
+3. Activity Tracker starts session, reports to Allow2 API
+4. **Allow2 platform calculates remaining time** (based on parent's rules)
+5. At 5:25 PM (115 min used), **Allow2 sends warning** → plugin notifies Bobby
+6. At 5:30 PM (120 min used), **Allow2 signals exhausted** → plugin turns off Xbox
+7. Bobby sees: "Daily Xbox time limit reached"
 
-**Result:**
-- Accurate time tracking
-- Automatic enforcement
-- Parent dashboard shows usage
-- Energy cost calculated and reported
+**Parent Monitoring (in Allow2 Mobile App):**
+- Parent sees Bobby used 120 minutes gaming today
+- Can approve extra time if Bobby requests it
+- Views weekly/monthly usage trends
+- Adjusts quotas as needed
+
+**Note:** All quota decisions happen in Allow2 app, not in allow2automate.
 
 ---
 

@@ -1,0 +1,161 @@
+{
+  "name": "@allow2/allow2automate-homeassistant",
+  "shortName": "homeassistant",
+  "version": "1.0.0",
+  "description": "Enable Allow2Automate to integrate with Home Assistant for smart home parental controls",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "jsnext:main": "dist/index.es.js",
+  "scripts": {
+    "test": "react-scripts test --env=jsdom",
+    "build": "rollup -c",
+    "start": "rollup -c -w",
+    "prepublish": "npm run build",
+    "postinstall": "npm run remove-peer-deps || true",
+    "remove-peer-deps": "rm -rf node_modules/react node_modules/react-dom node_modules/@material-ui node_modules/react-is node_modules/react-transition-group node_modules/hoist-non-react-statics || true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Allow2/allow2automate-homeassistant"
+  },
+  "bugs": {
+    "url": "https://github.com/Allow2/allow2automate-homeassistant/issues"
+  },
+  "homepage": "https://github.com/Allow2/allow2automate-homeassistant#readme",
+  "allow2Token": "HAIntegration2026",
+  "keywords": [
+    "allow2automate",
+    "allow2",
+    "home-assistant",
+    "homeassistant",
+    "plugin",
+    "iot",
+    "parental-controls",
+    "smart-home",
+    "xbox",
+    "playstation",
+    "media-player"
+  ],
+  "author": {
+    "name": "Allow2",
+    "url": "https://allow2.com"
+  },
+  "license": "MIT",
+  "allow2automate": {
+    "plugin": true,
+    "pluginId": "allow2automate-homeassistant",
+    "displayName": "Home Assistant Integration",
+    "category": "IoT",
+    "requiresMainProcess": true,
+    "permissions": [
+      "network",
+      "configuration"
+    ],
+    "minAppVersion": "2.0.0",
+    "api": {
+      "actions": [
+        {
+          "id": "discover",
+          "name": "Discover Devices",
+          "description": "Discover entertainment devices in Home Assistant"
+        },
+        {
+          "id": "turnOn",
+          "name": "Turn On",
+          "description": "Turn on a device via Home Assistant"
+        },
+        {
+          "id": "turnOff",
+          "name": "Turn Off",
+          "description": "Turn off a device via Home Assistant"
+        },
+        {
+          "id": "getState",
+          "name": "Get State",
+          "description": "Get current state of a device"
+        },
+        {
+          "id": "linkDevice",
+          "name": "Link Device",
+          "description": "Link a device to a child"
+        },
+        {
+          "id": "unlinkDevice",
+          "name": "Unlink Device",
+          "description": "Remove device-child link"
+        }
+      ],
+      "triggers": [
+        {
+          "id": "deviceDiscovered",
+          "name": "Device Discovered",
+          "description": "Triggered when a new device is discovered"
+        },
+        {
+          "id": "deviceStateChanged",
+          "name": "Device State Changed",
+          "description": "Triggered when device state changes"
+        },
+        {
+          "id": "sessionStarted",
+          "name": "Session Started",
+          "description": "Triggered when a child starts using a device"
+        },
+        {
+          "id": "sessionEnded",
+          "name": "Session Ended",
+          "description": "Triggered when a child stops using a device"
+        },
+        {
+          "id": "quotaExhausted",
+          "name": "Quota Exhausted",
+          "description": "Triggered when child's quota is exhausted"
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.13.9",
+    "ws": "^8.14.0",
+    "node-fetch": "^2.7.0"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0 || ^17.0.0",
+    "react-dom": "^16.0.0 || ^17.0.0",
+    "@material-ui/core": "^4.0.0"
+  },
+  "icon": "./img/home-assistant-icon.png",
+  "files": [
+    "dist",
+    "img"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@babel/plugin-external-helpers": "^7.12.13",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-decorators": "^7.0.0",
+    "@babel/plugin-proposal-do-expressions": "^7.0.0",
+    "@babel/plugin-proposal-export-default-from": "^7.0.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
+    "@babel/plugin-proposal-function-bind": "^7.0.0",
+    "@babel/plugin-proposal-function-sent": "^7.0.0",
+    "@babel/plugin-proposal-json-strings": "^7.0.0",
+    "@babel/plugin-proposal-logical-assignment-operators": "^7.0.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.0.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.0.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.0.0",
+    "@babel/plugin-proposal-pipeline-operator": "^7.0.0",
+    "@babel/plugin-proposal-throw-expressions": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-import-meta": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.13.9",
+    "@babel/preset-env": "^7.13.9",
+    "@babel/preset-react": "^7.12.13",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "rollup": "^2.40.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.0"
+  }
+}

@@ -6,9 +6,34 @@
 
 ---
 
+## 🎯 Critical Architecture Understanding
+
+**Allow2 Platform is the Control Center:**
+- **ALL parental decisions** (allowances, quotas, bans, day types) are managed through **Allow2 apps** (iOS, Android, Web)
+- **Parent-child communication** (requests, approvals, notifications) happens through **Allow2 apps**
+- **Allow2automate is NOT a configuration app** - it's a conduit/executor that connects Allow2 platform to devices
+
+**Workflow:**
+```
+Parent Sets Rules → Allow2 Platform → allow2automate → Home Assistant → Device Control
+Device Usage → Home Assistant → allow2automate → Allow2 Platform → Parent Sees in App
+```
+
+**The allow2automate parent app should ONLY:**
+- Display linked devices and their current status
+- Show device activity (which child is using what, when)
+- Provide device linking UI (connect HA devices to Allow2 children)
+- **NOT provide quota configuration**
+- **NOT provide ban/pausing controls**
+- **NOT provide child communication features**
+
+---
+
 ## Executive Summary
 
 The **allow2automate-homeassistant** plugin bridges parental controls with smart home automation by integrating with Home Assistant to monitor, track, and control entertainment devices, gaming consoles, TVs, and other smart home entities used by children.
+
+**This plugin enforces decisions made in the Allow2 platform** - it does not make parental control decisions itself.
 
 Unlike OS-level plugins that monitor computers, this plugin leverages Home Assistant's unified smart home platform to track and control:
 - Gaming consoles (Xbox, PlayStation, Nintendo Switch)
@@ -21,14 +46,16 @@ Unlike OS-level plugins that monitor computers, this plugin leverages Home Assis
 
 ## Core Purpose
 
-This plugin transforms Home Assistant into a parental control enforcement hub by:
+This plugin transforms Home Assistant into a parental control **enforcement hub** (not a decision-making hub) by:
 
 1. **Monitoring device power states and activity** via Home Assistant sensors
-2. **Tracking screen time per child per device** with parent-child-device linking
+2. **Tracking screen time per child per device** and reporting to Allow2 platform
 3. **Measuring electricity usage** for gaming consoles and entertainment devices
-4. **Automating device control** when quota limits are reached
-5. **Providing unified dashboard** showing all entertainment devices across the home
-6. **Real-time enforcement** via Home Assistant automation and WebSocket events
+4. **Automating device control** when quota limits (set in Allow2 apps) are reached
+5. **Providing unified dashboard** in allow2automate app showing all linked devices and their activity
+6. **Real-time enforcement** of rules configured in Allow2 platform
+
+**Important:** Parents manage quotas, bans, and day types through Allow2 mobile/web apps, NOT through allow2automate.
 
 ---
 
@@ -132,13 +159,13 @@ automation:
 
 ### 6. Parent Dashboard & Reports
 
-**Dashboard Features:**
+**Dashboard Features (in allow2automate app):**
 - All linked devices with status
 - Current activity by child
-- Today's usage vs quota
-- Weekly/monthly reports
-- Energy consumption charts
 - Device-specific history
+- Energy consumption charts
+
+**Note:** Quotas, allowances, and parental controls are managed in **Allow2 mobile/web apps**, NOT in the allow2automate app. The allow2automate dashboard shows device activity and enforces rules, but does not configure them.
 
 ---
 
@@ -151,16 +178,19 @@ automation:
 **Setup:**
 - Home Assistant Xbox integration detects console
 - Smart plug monitors Xbox power consumption
-- Plugin links Xbox to Bobby's Allow2 account
-- Parent sets quota: 120 minutes/day
+- Plugin links Xbox to Bobby's Allow2 account in allow2automate app
+- **Parent sets quota in Allow2 mobile/web app: 120 minutes/day**
 
 **Flow:**
 1. Bobby turns on Xbox → HA detects power state change
 2. Plugin receives WebSocket event, starts timer for Bobby
 3. Plugin sends usage to Allow2 API every 5 minutes
-4. At 115 minutes, warning notification sent
-5. At 120 minutes, smart plug turns off Xbox
-6. Bobby sees notification: "Daily Xbox time limit reached"
+4. **Allow2 platform calculates remaining quota** based on parent's rules
+5. At 115 minutes, **Allow2 platform triggers warning** → plugin sends notification
+6. At 120 minutes, **Allow2 platform signals quota exhausted** → plugin turns off Xbox via smart plug
+7. Bobby sees notification: "Daily Xbox time limit reached"
+
+**Note:** The quota (120 minutes) is configured in the Allow2 app, NOT in allow2automate.
 
 ### Use Case 2: Shared Family TV with Multiple Users
 

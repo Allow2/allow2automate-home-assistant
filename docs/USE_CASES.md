@@ -5,6 +5,33 @@
 
 ---
 
+## 🎯 Understanding the Control Flow
+
+**Before reading these use cases, understand the architecture:**
+
+1. **Parents manage ALL rules in Allow2 apps** (iOS/Android/Web):
+   - Set quotas (daily gaming time, video time, etc.)
+   - Configure day types (school day, weekend, vacation)
+   - Manage bans and pauses
+   - Approve/deny child requests for extra time
+   - Communicate with children
+
+2. **Allow2automate enforces those decisions**:
+   - Reports device usage to Allow2 platform
+   - Queries Allow2 API for "is quota exhausted?"
+   - Turns off devices when Allow2 says quota is used up
+   - Shows device status in dashboard (NOT quota configuration)
+
+3. **Child interactions happen in Allow2 apps**:
+   - Child requests extra time → Allow2 app
+   - Parent approves/denies → Allow2 app
+   - Child sees remaining time → Allow2 app
+   - Notifications about limits → Allow2 app sends them
+
+**In all use cases below, when we say "parent sets quota," this means the parent uses their Allow2 mobile/web app, NOT the allow2automate application.**
+
+---
+
 ## Table of Contents
 
 1. [Gaming Console Time Tracking](#gaming-console-time-tracking)
@@ -26,8 +53,9 @@
 
 **Scenario:**
 - Bobby (age 12) has an Xbox Series X in his bedroom
-- Parents allow 2 hours of gaming per weekday, 4 hours per weekend day
+- **Parents configure in Allow2 mobile app:** 2 hours of gaming per weekday, 4 hours per weekend day
 - Xbox is connected to a TP-Link Kasa smart plug for power monitoring
+- Plugin links Xbox to Bobby's Allow2 account
 
 ### Home Assistant Setup
 
@@ -94,15 +122,16 @@ switch:
 │ 2. Gaming in progress (3:30 PM - 5:25 PM)                    │
 ├─────────────────────────────────────────────────────────────┤
 │ • Activity Tracker updates session every 5 minutes           │
-│ • Plugin sends usage to Allow2: POST /log                    │
-│ • Current usage: 115 minutes                                 │
-│ • Quota remaining: 5 minutes                                 │
+│ • Plugin sends usage to Allow2 API: POST /log               │
+│ • Allow2 platform calculates usage: 115 minutes              │
+│ • Allow2 platform calculates remaining: 5 minutes            │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
 │ 3. Quota warning (5:25 PM)                                   │
 ├─────────────────────────────────────────────────────────────┤
-│ • Quota Manager detects 5 minutes remaining                  │
+│ • Allow2 API returns: 5 minutes remaining (warning state)    │
+│ • Quota Manager receives warning from Allow2                 │
 │ • Trigger warning notification                               │
 │                                                              │
 │ HA Service Call:                                             │
@@ -116,7 +145,8 @@ switch:
 ┌─────────────────────────────────────────────────────────────┐
 │ 4. Quota exhausted (5:30 PM)                                 │
 ├─────────────────────────────────────────────────────────────┤
-│ • Quota Manager detects 0 minutes remaining                  │
+│ • Allow2 API returns: 0 minutes remaining (exhausted state)  │
+│ • Quota Manager receives exhausted signal from Allow2        │
 │ • Enforcement Engine executes action                         │
 │                                                              │
 │ Step 1: Final warning                                        │
@@ -137,9 +167,12 @@ switch:
 ┌─────────────────────────────────────────────────────────────┐
 │ 5. Next day reset (Midnight)                                 │
 ├─────────────────────────────────────────────────────────────┤
-│ • Allow2 API resets daily quota                              │
-│ • Plugin queries new quota: 120 minutes available            │
+│ • Allow2 platform automatically resets daily quota           │
+│ • Plugin queries Allow2 API: 120 minutes available           │
 │ • Bobby can play again tomorrow                              │
+│                                                              │
+│ NOTE: Parents can also adjust quotas any time through        │
+│       Allow2 mobile/web app (NOT through allow2automate)     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
