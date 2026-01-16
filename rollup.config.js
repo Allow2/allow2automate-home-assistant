@@ -26,17 +26,7 @@ export default {
         babel({
             babelHelpers: 'runtime',
             exclude: /node_modules/
-        }),
-        [
-            "@babel/plugin-transform-runtime",
-            {
-                "absoluteRuntime": false,
-                "corejs": false,
-                "helpers": true,
-                "regenerator": true,
-                "version": "7.0.0-beta.0"
-            }
-        ]
+        })
     ],
     external: Object.keys(pkg.peerDependencies || {})
 };
