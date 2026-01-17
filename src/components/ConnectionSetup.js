@@ -42,7 +42,9 @@ class ConnectionSetup extends Component {
             url: props.config?.homeAssistant?.url || '',
             accessToken: props.config?.homeAssistant?.accessToken || '',
             testing: false,
+            connecting: false,
             testResult: null,
+            testMessage: null,
             showToken: false
         };
     }
@@ -94,7 +96,9 @@ class ConnectionSetup extends Component {
     handleSave = async () => {
         const { url, accessToken } = this.state;
 
-        // Update configuration
+        this.setState({ connecting: true, testResult: null, testMessage: null });
+
+        // Update configuration with credentials
         const newConfig = {
             ...this.props.config,
             homeAssistant: {
@@ -106,17 +110,53 @@ class ConnectionSetup extends Component {
 
         this.props.configurationUpdate(newConfig);
 
-        // Trigger reconnection
+        // Trigger connection
         try {
-            await this.props.ipc.invoke('ha:connect', { url, accessToken });
+            console.log('[HA ConnectionSetup] Calling ha:connect...');
+            const result = await this.props.ipc.invoke('ha:connect', { url, accessToken });
+            console.log('[HA ConnectionSetup] ha:connect result:', result);
+
+            if (result && result.success) {
+                this.setState({
+                    connecting: false,
+                    testResult: 'success',
+                    testMessage: result.message || 'Connected successfully!'
+                });
+            } else {
+                this.setState({
+                    connecting: false,
+                    testResult: 'error',
+                    testMessage: result?.message || 'Connection failed'
+                });
+            }
         } catch (error) {
-            console.error('Failed to connect:', error);
+            console.error('[HA ConnectionSetup] Failed to connect:', error);
+            this.setState({
+                connecting: false,
+                testResult: 'error',
+                testMessage: error.message || 'Connection error'
+            });
         }
     };
 
     handleDisconnect = async () => {
         try {
-            await this.props.ipc.invoke('ha:disconnect');
+            const result = await this.props.ipc.invoke('ha:disconnect');
+            if (result && result.success) {
+                // Update configuration with disconnected status
+                const newConfig = {
+                    ...this.props.config,
+                    connectionStatus: result.connectionStatus || {
+                        connected: false,
+                        authenticated: false
+                    }
+                };
+                this.props.configurationUpdate(newConfig);
+                this.setState({
+                    testResult: null,
+                    testMessage: null
+                });
+            }
         } catch (error) {
             console.error('Failed to disconnect:', error);
         }
@@ -157,11 +197,12 @@ class ConnectionSetup extends Component {
     }
 
     render() {
-        const { url, accessToken, testing, testResult, testMessage, showToken } = this.state;
+        const { url, accessToken, testing, connecting, testResult, testMessage, showToken } = this.state;
         const { connectionStatus } = this.props;
 
         const isConnected = connectionStatus?.status === 'connected';
         const canSave = url && accessToken;
+        const isLoading = testing || connecting;
 
         return (
             <Card>
@@ -227,7 +268,7 @@ class ConnectionSetup extends Component {
                     <Button
                         variant="outlined"
                         onClick={this.handleTestConnection}
-                        disabled={!url || !accessToken || testing}
+                        disabled={!url || !accessToken || isLoading}
                         style={{ marginRight: 8 }}
                     >
                         {testing ? (
@@ -240,21 +281,29 @@ class ConnectionSetup extends Component {
                         )}
                     </Button>
 
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={this.handleSave}
-                        disabled={!canSave || testing}
-                    >
-                        {isConnected ? 'Reconnect' : 'Connect'}
-                    </Button>
+                    {!isConnected && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={this.handleSave}
+                            disabled={!canSave || isLoading}
+                        >
+                            {connecting ? (
+                                <>
+                                    <CircularProgress size={20} style={{ marginRight: 8, color: 'white' }} />
+                                    Connecting...
+                                </>
+                            ) : (
+                                'Connect'
+                            )}
+                        </Button>
+                    )}
 
                     {isConnected && (
                         <Button
                             variant="outlined"
                             color="secondary"
                             onClick={this.handleDisconnect}
-                            style={{ marginLeft: 8 }}
                         >
                             Disconnect
                         </Button>

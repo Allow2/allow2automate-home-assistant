@@ -154,12 +154,12 @@ class TabContent extends Component {
 
         return (
             <Box>
-                {childList.map(child => {
+                {childList.map((child, index) => {
                     const todayUsage = data?.todayUsage?.[child.id];
                     const breakdown = todayUsage?.breakdownMinutes || {};
 
                     return (
-                        <Card key={child.id} style={{ marginBottom: 16 }}>
+                        <Card key={child.id || `child-${index}`} style={{ marginBottom: 16 }}>
                             <CardContent>
                                 <Typography variant="h6" gutterBottom>
                                     {child.name}
@@ -229,26 +229,14 @@ class TabContent extends Component {
                     indicatorColor="primary"
                     textColor="primary"
                 >
-                    <Tab label="Connection" />
                     <Tab label="Devices" />
                     <Tab label="Activity" />
                     <Tab label="Usage" />
+                    <Tab label="Connection" />
                 </Tabs>
 
-                {/* Connection Tab */}
-                {currentTab === 0 && (
-                    <Box p={3}>
-                        <ConnectionSetup
-                            config={data}
-                            connectionStatus={connectionStatus}
-                            configurationUpdate={configurationUpdate}
-                            ipc={ipc}
-                        />
-                    </Box>
-                )}
-
                 {/* Devices Tab */}
-                {currentTab === 1 && (
+                {currentTab === 0 && (
                     <Box p={3}>
                         <DeviceList
                             devices={devices}
@@ -263,7 +251,7 @@ class TabContent extends Component {
                 )}
 
                 {/* Activity Tab */}
-                {currentTab === 2 && (
+                {currentTab === 1 && (
                     <Box p={3}>
                         <Typography variant="h6" gutterBottom>
                             Active Sessions
@@ -273,12 +261,24 @@ class TabContent extends Component {
                 )}
 
                 {/* Usage Tab */}
-                {currentTab === 3 && (
+                {currentTab === 2 && (
                     <Box p={3}>
                         <Typography variant="h6" gutterBottom>
                             Today's Usage
                         </Typography>
                         {this.renderUsageTab()}
+                    </Box>
+                )}
+
+                {/* Connection Tab */}
+                {currentTab === 3 && (
+                    <Box p={3}>
+                        <ConnectionSetup
+                            config={data}
+                            connectionStatus={connectionStatus}
+                            configurationUpdate={configurationUpdate}
+                            ipc={ipc}
+                        />
                     </Box>
                 )}
 

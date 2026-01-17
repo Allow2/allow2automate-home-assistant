@@ -254,25 +254,54 @@ function registerIPCHandlers(haPlugin, context) {
 
     // Connect to Home Assistant
     ipcMain.handle('ha:connect', async (event, params) => {
+        logger.info('ha:connect called with URL:', params?.url ? params.url.replace(/\/\/.*:.*@/, '//***@') : 'undefined');
+
         try {
+            // Save credentials to state
+            haPlugin.state.homeAssistant = {
+                url: params.url,
+                accessToken: params.accessToken
+            };
+
             haPlugin.haConnection.configure(params);
+            logger.info('Connection configured, testing...');
 
             const connected = await haPlugin.haConnection.testConnection();
             if (!connected) {
+                logger.error('Connection test failed in ha:connect');
+                updateConnectionStatus(haPlugin, context, { connected: false, authenticated: false });
                 return { success: false, message: 'Connection test failed' };
             }
 
-            await haPlugin.haConnection.connectWebSocket();
+            logger.info('Connection test passed, connecting WebSocket...');
+
+            try {
+                await haPlugin.haConnection.connectWebSocket();
+                logger.info('WebSocket connected successfully');
+            } catch (wsError) {
+                logger.error('WebSocket connection failed:', wsError.message);
+                // Still mark as connected (REST works), but not fully authenticated
+                updateConnectionStatus(haPlugin, context, { connected: true, authenticated: false });
+                context.configurationUpdate(haPlugin.state);
+                return { success: true, message: 'Connected (REST only, WebSocket failed: ' + wsError.message + ')' };
+            }
+
             haPlugin.activityTracker.start();
 
+            logger.info('Updating connection status to connected');
             updateConnectionStatus(haPlugin, context, { connected: true, authenticated: true });
 
             // Auto-discover devices
+            logger.info('Starting device discovery...');
             await haPlugin.discoveryService.scan();
             updateDevices(haPlugin, context);
 
+            logger.info('ha:connect completed successfully');
+
             return { success: true };
         } catch (error) {
+            logger.error('ha:connect error:', error.message);
+            updateConnectionStatus(haPlugin, context, { connected: false, authenticated: false });
             return { success: false, message: error.message };
         }
     });
@@ -282,7 +311,13 @@ function registerIPCHandlers(haPlugin, context) {
         haPlugin.activityTracker.stop();
         haPlugin.haConnection.disconnect();
         updateConnectionStatus(haPlugin, context, { connected: false, authenticated: false });
-        return { success: true };
+        return {
+            success: true,
+            connectionStatus: {
+                connected: false,
+                authenticated: false
+            }
+        };
     });
 
     // Discover devices
